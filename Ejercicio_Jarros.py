@@ -19,8 +19,8 @@ from simpleai.search import (
 )
 from simpleai.search.viewers import BaseViewer, WebViewer
 
-Goal = (1,1,1,1)
-Initial_State = (0,0,0,4)
+Goal = (1,1,1,1,1,1)
+Initial_State = (0,0,0,0,0,6)
 class ProblemaJarros(SearchProblem):
     def actions(self, state): ##Defino que Jarros voy a trasvasar
         actions = []
@@ -61,8 +61,10 @@ class ProblemaJarros(SearchProblem):
 
 my_problem = ProblemaJarros(Initial_State)
 
-v = BaseViewer()
-result = astar(my_problem)
+#v = BaseViewer()
+v = WebViewer()
+result = limited_depth_first(my_problem, 20, viewer=v)
+
 
 if result is None:
     print("No solution")
