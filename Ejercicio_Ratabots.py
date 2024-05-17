@@ -32,18 +32,20 @@ class Ratabots(SearchProblem):
                     actions.append((posicion,casilla))#origen, destino
         return actions ##Consultar a fisa si debo considerar en las acciones comer, o si lo hago en el resultado cuando la rata esta encima de la casilla que posee la comida
     
-    def results(self, state, actions):
-        origen, destino = actions
+    def result(self, state, action):
+        origen, destino = action
         Comidas = state[2]
-        estado = list(state)
+        state = list(state)
+        state[2]= list(state[2])
         for pos,comida in enumerate(Comidas): ##Si hay una comida, la come
             es_comida = (comida == destino)
             if es_comida:
                 state[2].remove(comida)
-                estado[1] +=1 
-        estado [0] = destino
-        estado = tuple(estado)
-        return estado
+                state[1] +=1 
+        state [0] = destino
+        state[2]= tuple(state[2])
+        state = tuple(state)
+        return state
     
     def is_goal(self, state):
         return state == GOAL
@@ -59,8 +61,8 @@ class Ratabots(SearchProblem):
 
 my_problem = Ratabots(Initial_state)
 
-#v = BaseViewer()
-v = WebViewer()
+v = BaseViewer()
+#v = WebViewer()
 result = astar(my_problem, 1000, viewer= v)
 
 if result is None:
