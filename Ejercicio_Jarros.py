@@ -19,8 +19,8 @@ from simpleai.search import (
 )
 from simpleai.search.viewers import BaseViewer, WebViewer
 
-Goal = (1,1,1,1)
-Initial_State = (0,0,0,4)
+Goal = (1,1,1,1,1,1)
+Initial_State = (0,0,0,0,0,6)
 class ProblemaJarros(SearchProblem):
     def actions(self, state): ##Defino que Jarros voy a trasvasar
         actions = []
@@ -36,14 +36,15 @@ class ProblemaJarros(SearchProblem):
         origen, destino = actions
         lo_que_falta_para_llenarse = (destino + 1) - state[destino] #Le resto a la posición mas uno el contenido para sacar el faltante que tiene ese jarro
         #Proximo paso es trasvasar. Tengo que verificar que no se pase del contenido. Lo que puedi hacer es vaciar el jarro y el 
-        state = [list(item) for item in state] ## hago esto para convertirlo en una lista y poder trabajarlo
+        state = list(state) ## hago esto para convertirlo en una lista y poder trabajarlo
+                         
         if (state[origen] > lo_que_falta_para_llenarse):
             state[origen] -= lo_que_falta_para_llenarse
             state[destino] += lo_que_falta_para_llenarse
         else :
             state[destino] += state[origen]
             state[origen] = 0
-        state = tuple(tuple(row) for row in state) ## hago esto para volver a convertirlo en una tupla
+        state = tuple(state) ## hago esto para volver a convertirlo en una tupla
         return state
     
     def cost(self, state, action, state2):
@@ -60,8 +61,10 @@ class ProblemaJarros(SearchProblem):
 
 my_problem = ProblemaJarros(Initial_State)
 
-v = BaseViewer()
-result = astar(my_problem)
+#v = BaseViewer()
+v = WebViewer()
+result = limited_depth_first(my_problem, 20, viewer=v)
+
 
 if result is None:
     print("No solution")

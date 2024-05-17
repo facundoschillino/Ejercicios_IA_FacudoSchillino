@@ -8,7 +8,7 @@ from simpleai.search import (
     greedy,
     astar,
 )
-from simpleai.search.viewers import BaseViewer, WebViewer
+from simpleai.search.viewers import BaseViewer, WebViewer, ConsoleViewer
 
 
 INITIAL = (
@@ -86,16 +86,16 @@ class EightPuzzleProblem(SearchProblem):
 
 my_problem = EightPuzzleProblem(INITIAL)
 
-v = BaseViewer()
-#v = WebViewer()
-
+#v = BaseViewer()
+v = WebViewer()
+#v = ConsoleViewer()
 #result = breadth_first(my_problem)
 #result = uniform_cost(my_problem)
 #result = depth_first(my_problem, graph_search=True)
-#result = limited_depth_first(my_problem, 20, viewer=v)
+result = limited_depth_first(my_problem, 20, viewer=v)
 #result = limited_depth_first(my_problem, 6, viewer=v)
 #result = iterative_limited_depth_first(my_problem, viewer=v)
-result = astar(my_problem)
+
 
 if result is None:
     print("No solution")
