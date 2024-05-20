@@ -37,19 +37,8 @@ def find_token(state, token_to_find):
 
 class EightPuzzleProblem(SearchProblem):
     def actions(self, state):
-        empty_row, empty_col = find_token(state, "x")
-        actions = []
-
-        if empty_row > 0:
-            actions.append((empty_row - 1, empty_col))
-        if empty_row < 2:
-            actions.append((empty_row + 1, empty_col))
-        if empty_col > 0:
-            actions.append((empty_row, empty_col - 1))
-        if empty_col < 2:
-            actions.append((empty_row, empty_col + 1))
-
-        return actions
+    
+        return 
 
     def result(self, state, action):
         empty_row, empty_col = find_token(state, "x")

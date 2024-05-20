@@ -9,14 +9,11 @@ from simpleai.search import (
     astar,
 )
 from simpleai.search.viewers import BaseViewer, WebViewer
-
 Dimension_tablero = (3,4)
 Obstaculos = ((0,2),(2,1),(1,3))
 Initial_state = ((0,1),(0,1))
 GOAL = ((3,2),(0,4))
-
 class Robots_Defensivos(SearchProblem):
-
     def actions(self, state):
         actions = []
         robot1,robot2= state
@@ -36,7 +33,6 @@ class Robots_Defensivos(SearchProblem):
                 if (posible_casillero in Obstaculos) == False:
                     actions.append(posible_casillero)
         return actions
-    
     def result(self, state, action):   
         que_robot_es = action[0]
         destino = (action[1], action[2])
@@ -44,13 +40,10 @@ class Robots_Defensivos(SearchProblem):
         state[que_robot_es -1] = destino
         state = tuple(state)
         return state
-    
     def is_goal(self, state):
         return state == GOAL
-    
     def cost(self, state, action, state2):
         return 1
-    
     def heuristics(self, state):
         cuanto_falta = 0
         for cual,robot in enumerate(state):
@@ -58,13 +51,10 @@ class Robots_Defensivos(SearchProblem):
             cuanto_falta = abs(robot[0] - objetivo[0])
             cuanto_falta = abs(robot[1] - objetivo[1])
         return cuanto_falta
-
 my_problem = Robots_Defensivos(Initial_state)
-
 #v = BaseViewer()
 v = WebViewer()
 result = astar(my_problem, 1000, viewer= v)
-
 if result is None:
     print("No solution")
 else:
