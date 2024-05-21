@@ -1,33 +1,36 @@
-
-INITIAL = ((0,0),((0,0)))
+INITIAL = (3,3)
+ENEMIES=((0,0),(0,1),(0,4),(1,4),(2,0),(3,1),(3,6),(0,4),(6,5),(6,3))
+def Casillas_atacadas(lista):
+    posibilidades = []
+    for enemigo in lista:
+        fila = enemigo[0]
+        columna = enemigo[1]
+        posibilidades.append((fila-1, columna))
+        posibilidades.append((fila+1,columna))
+        posibilidades.append((fila, columna+1))
+        posibilidades.append((fila, columna-1))
+    return posibilidades
 def actions(state):
         actions = []
+        bajo_ataque = Casillas_atacadas(ENEMIES)
+        fila,columna = state
         posibilidades = []
-        pos_actual = state[0]
-        Visitadas = state[1]
-        posibilidades.append((pos_actual[0]+1, pos_actual[1]+2))
-        posibilidades.append((pos_actual[0]+2, pos_actual[1]+1))
-        posibilidades.append((pos_actual[0]-1, pos_actual[1]+2))
-        posibilidades.append((pos_actual[0]+1, pos_actual[1]-2))
-        posibilidades.append((pos_actual[0]-1, pos_actual[1]-2))
-        posibilidades.append((pos_actual[0]+2, pos_actual[1]-1))
-        posibilidades.append((pos_actual[0]-2, pos_actual[1]-1))
-        for posibilidad in posibilidades:
-            ya_paso = False
-            if posibilidad in Visitadas:
-                 ya_paso = True
-            if (posibilidad[0]>=0 and posibilidad[0]<=8 and posibilidad[1] >=0 and posibilidad[1]<=8 and ya_paso == False): ## Tengo que verificar en las acciones que el caballo no pueda moverse a una casilla ya visitada?
-                actions.append(posibilidad)
+        posibilidades.append((fila-1, columna))
+        posibilidades.append((fila+1,columna))
+        posibilidades.append((fila, columna+1))
+        posibilidades.append((fila, columna-1))
+        for casilla in posibilidades:
+            Esta_atacada = False
+            Esta_atacada = (casilla in bajo_ataque)
+            if (casilla[0] >= 0 and casilla[0] <= 6) and (casilla[1] >= 0 and casilla[1] <= 6) and(Esta_atacada == False):
+                actions.append(casilla)
         return actions
-def result (state,action):
-        state = list(state)
-        Visitadas = state[1]
-        state[0] = action
-        state[1]= list(state[1])
-        state[1].append(action)
-        state[1]= tuple(state[1])
-        return tuple(state)
-resultado = result(INITIAL,(2,1))
-print(resultado)
 acciones = actions(INITIAL)
 print (acciones)
+
+
+
+
+
+
+
