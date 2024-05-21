@@ -4,7 +4,7 @@ from simpleai.search import (
 )
 from simpleai.search.viewers import ConsoleViewer
 
-INITIAL = ((0, 0), set())
+INITIAL = ((0, 0), [])
 
 class TourDelCaballo(SearchProblem):
     def actions(self, state):
@@ -28,7 +28,7 @@ class TourDelCaballo(SearchProblem):
     def result(self, state, action):
         pos_actual, visitadas = state
         nuevas_visitadas = visitadas.copy()
-        nuevas_visitadas.add(action)
+        nuevas_visitadas.append(pos_actual)
         return (action, nuevas_visitadas)
 
     def is_goal(self, state):
@@ -52,3 +52,4 @@ else:
         print("Casillas Visitadas:")
         print(state[1])
     print("Costo Total:", result.cost)
+
