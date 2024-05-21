@@ -1,36 +1,54 @@
-INITIAL = (3,3)
-ENEMIES=((0,0),(0,1),(0,4),(1,4),(2,0),(3,1),(3,6),(0,4),(6,5),(6,3))
-def Casillas_atacadas(lista):
-    posibilidades = []
-    for enemigo in lista:
-        fila = enemigo[0]
-        columna = enemigo[1]
-        posibilidades.append((fila-1, columna))
-        posibilidades.append((fila+1,columna))
-        posibilidades.append((fila, columna+1))
-        posibilidades.append((fila, columna-1))
-    return posibilidades
-def actions(state):
-        actions = []
-        bajo_ataque = Casillas_atacadas(ENEMIES)
-        fila,columna = state
-        posibilidades = []
-        posibilidades.append((fila-1, columna))
-        posibilidades.append((fila+1,columna))
-        posibilidades.append((fila, columna+1))
-        posibilidades.append((fila, columna-1))
-        for casilla in posibilidades:
-            Esta_atacada = False
-            Esta_atacada = (casilla in bajo_ataque)
-            if (casilla[0] >= 0 and casilla[0] <= 6) and (casilla[1] >= 0 and casilla[1] <= 6) and(Esta_atacada == False):
-                actions.append(casilla)
-        return actions
-acciones = actions(INITIAL)
-print (acciones)
+from simpleai.search import (
+    SearchProblem,
+    astar,
+)
+from simpleai.search.viewers import ConsoleViewer
 
+INITIAL = ((0, 0), set())
 
+class TourDelCaballo(SearchProblem):
+    def actions(self, state):
+        pos_actual, visitadas = state
+        movimientos = [
+            (pos_actual[0] + 1, pos_actual[1] + 2),
+            (pos_actual[0] + 2, pos_actual[1] + 1),
+            (pos_actual[0] + 1, pos_actual[1] - 2),
+            (pos_actual[0] + 2, pos_actual[1] - 1),
+            (pos_actual[0] - 1, pos_actual[1] + 2),
+            (pos_actual[0] - 2, pos_actual[1] + 1),
+            (pos_actual[0] - 1, pos_actual[1] - 2),
+            (pos_actual[0] - 2, pos_actual[1] - 1),
+        ]
+        acciones = []
+        for movimiento in movimientos:
+            if 0 <= movimiento[0] < 8 and 0 <= movimiento[1] < 8 and movimiento not in visitadas:
+                acciones.append(movimiento)
+        return acciones
 
+    def result(self, state, action):
+        pos_actual, visitadas = state
+        nuevas_visitadas = visitadas.copy()
+        nuevas_visitadas.add(action)
+        return (action, nuevas_visitadas)
 
+    def is_goal(self, state):
+        return len(state[1]) == 64
 
+    def cost(self, state, action, state2):
+        return 1
 
+    def heuristic(self, state):
+        return 0  # No necesitamos heurística
 
+my_problem = TourDelCaballo(INITIAL)
+v = ConsoleViewer()
+result = astar(my_problem, viewer=v)
+
+if result is None:
+    print("No solution")
+else:
+    for action, state in result.path():
+        print("Siguiente Movimiento:", action)
+        print("Casillas Visitadas:")
+        print(state[1])
+    print("Costo Total:", result.cost)

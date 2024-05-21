@@ -40,10 +40,8 @@ class Tour_Del_Caballo(SearchProblem): #Preguntar a fisa
         state[1]= tuple(state[1])
         return tuple(state)
     
-    def is_goal(self,state):
-        Visitadas = state[1]
-        total = len(Visitadas)
-        return(total== 64)
+    def is_goal(self, state):
+        return len(state[1]) == 64
     
     def cost(self,state,action,state2):
         return 1
