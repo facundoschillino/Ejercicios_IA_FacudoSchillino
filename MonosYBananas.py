@@ -40,7 +40,7 @@ class MonosyBananas(SearchProblem):
              actions.append("Bajarse", (mono[0], mono[1]+1))
              actions.append("Bajarse", (mono[0], mono[1]-1))
         elif (esta_cerca(mono,silla)): # Puede empujar la silla
-
+            algo = 0 # Aca lo deje, me dio paja seguir
         return 0
     def result(self, state, action):
         return 
