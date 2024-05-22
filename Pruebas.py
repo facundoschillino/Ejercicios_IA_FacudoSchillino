@@ -1,72 +1,58 @@
-from simpleai.search import astar, SearchProblem
-from simpleai.search.viewers import WebViewer, BaseViewer
+from simpleai.search import (
+    SearchProblem,
+    astar,
+)
+from simpleai.search.viewers import BaseViewer
 
+# Estado inicial y estado objetivo
+INITIAL = (0, 0, 0)
+GOAL = (5, 1, 8)
 
-class JarrosProblem(SearchProblem):
-    def __init__(self, numero_de_jarros):
-        '''
-        El estado lo representamos con una tupla de N posiciones, donde el
-        jarro de capacidad x esta en la posición x-1.
-
-        En el estado inicial tenemos todos los jarros vacios excepto el
-        último que está lleno
-        '''
-
-        self.N = numero_de_jarros
-        inicial = tuple([0] * (self.N - 1) + [self.N])
-        super(JarrosProblem, self).__init__(inicial)
-
-    def is_goal(self, state):
-        'Nuestra meta es que todos los jarros posean 1 litro de agua'
-        return all(x == 1 for x in state)
-
-    def capacidad(self, posicion_jarro, litros_que_tiene):
-        'Funcion auxiliar para calcular la capacidad restante de un jarro'
-        return posicion_jarro + 1 - litros_que_tiene
-
+class NaveAlienigena(SearchProblem):
     def actions(self, state):
-        '''
-        El enunciado dice que las operaciones son trasvasar de un jarro a otro,
-        con lo cual, nuestras acciones van a ser una tupla (jarro_origen, jarro_destino),
-        siendo jarro_origen y jarro_destino las posiciones de los jarros.
-
-        Una acción va a ser aplicable solo cuando jarro_origen tenga agua y
-        jarro_destino no esté lleno.
-        '''
-        acciones = []
-        for jarro_origen, litros_origen in enumerate(state):
-            for jarro_destino, litros_destino in enumerate(state):
-                if (litros_origen > 0 and self.capacidad(jarro_destino, litros_destino) > 0):
-                    acciones.append((jarro_origen, jarro_destino))
-        return acciones
-
-    def cost(self, state1, action, state2):
-        'El costo de la acción es la capacidad total del jarro origen'
-        return action[0] + 1
+        # Definir las posibles acciones
+        return [
+            "rojo",
+            "verde",
+            "amarillo",
+            "celeste"
+        ]
 
     def result(self, state, action):
-        '''
-        Esta funcion le quita X litros a jarro origen y los pone en jarro_destino
+        state = list(state)  # Convertir el estado a una lista para modificarlo
+        if action == "rojo":
+            state[0] += 3
+        elif action == "verde":
+            state[0] -= 2
+        elif action == "amarillo":
+            state[0], state[1] = state[1], state[0]
+        elif action == "celeste":
+            state[1], state[2] = state[2], state[1]
+        return tuple(state)  # Convertir el estado de nuevo a una tupla
 
-        X puede ser los litros del jarro origen o lo que falte para llenar el
-        jarro destino, lo que demande menos agua.
-        '''
-        jarro_origen, jarro_destino = action
-        litros_origen, litros_destino = state[jarro_origen], state[jarro_destino]
+    def cost(self, state, action, state2):
+        return 1  # Todas las acciones tienen el mismo costo
 
-        a_trasvasar = min(litros_origen,
-                          self.capacidad(jarro_destino, litros_destino))
-
-        s = list(state)
-        s[jarro_origen] -= a_trasvasar
-        s[jarro_destino] += a_trasvasar
-
-        return tuple(s)
+    def is_goal(self, state):
+        return state == GOAL  # Verificar si el estado actual es el objetivo
 
     def heuristic(self, state):
-        'Una posible heuristica es la cantidad de jarros que no tienen agua'
-        return len([x for x in state if x == 0])
+        # Heurística que suma las diferencias absolutas entre el estado actual y el objetivo
+        return sum(abs(state[i] - GOAL[i]) for i in range(len(state)))
 
+# Crear una instancia del problema
+my_problem = NaveAlienigena(INITIAL)
+v = BaseViewer()
 
-# Resolucion por A*
-result = astar(JarrosProblem(4), graph_search=True, viewer=WebViewer())
+# Ejecutar la búsqueda A*
+result = astar(my_problem, viewer=v)
+
+# Mostrar los resultados
+if result is None:
+    print("No solution")
+else:
+    for action, state in result.path():
+        print("Action:", action)
+        print("State:", state)
+    print("Final cost:", result.cost)
+
