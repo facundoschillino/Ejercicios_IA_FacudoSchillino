@@ -1,41 +1,72 @@
-INITIAL = ((0,0),((0,0),"rojo"))
+from simpleai.search import astar, SearchProblem
+from simpleai.search.viewers import WebViewer, BaseViewer
 
 
-def actions(state):
-        pos_actual, casillas = state
-        actions = []
-        posibilidades = [] #Genero las 8 casillas a las que se deberia poder mover
-        posibilidades.append((pos_actual[0]+1, pos_actual[1]+2))
-        posibilidades.append((pos_actual[0]+2, pos_actual[1]+1))
-        posibilidades.append((pos_actual[0]-1, pos_actual[1]+2))
-        posibilidades.append((pos_actual[0]+1, pos_actual[1]-2))
-        posibilidades.append((pos_actual[0]-1, pos_actual[1]-2))
-        posibilidades.append((pos_actual[0]+2, pos_actual[1]-1))
-        posibilidades.append((pos_actual[0]-2, pos_actual[1]-1))
-        for posibilidad in posibilidades: # Aca voy a suprimir las casillas ya visitadas y las casillas que estan fuera del rango del tablero
-            if (posibilidad[0]>=0 and posibilidad[0]<=2 and posibilidad[1] >=0 and posibilidad[1]<=3 and ((posibilidad, "blanco") in casillas)): ## Tengo que verificar en las acciones que el caballo no pueda moverse a una casilla ya visitada?
-                actions.append(((posibilidad),"blanco"))
-        return  actions
-def result(state, action): ##Voy a mover la casilla actual a la de la accion y pintar de rojo
-        coord_actual = list(state[0])
-        casillas = list(state[1])
-        indice = casillas.index(action)
-        coord_actual = action
+class JarrosProblem(SearchProblem):
+    def __init__(self, numero_de_jarros):
+        '''
+        El estado lo representamos con una tupla de N posiciones, donde el
+        jarro de capacidad x esta en la posición x-1.
 
-        casillas[indice] = list(casillas[indice])
-        casillas[indice][1] = "rojo"
-        casillas[indice] = tuple(casillas[indice])
-        state = list(state)
-        state[0]= tuple(coord_actual)
-        state[1] = tuple(casillas)  
-        return tuple(state)
-ejemplo = ((1, 2), 'blanco')
+        En el estado inicial tenemos todos los jarros vacios excepto el
+        último que está lleno
+        '''
 
-def is_goal(state):
-        goal = True
-        for item in state[1]:
-            if  "blanco" in item:
-                goal = False
-        return goal
-accion = is_goal(INITIAL)
-print(accion)
+        self.N = numero_de_jarros
+        inicial = tuple([0] * (self.N - 1) + [self.N])
+        super(JarrosProblem, self).__init__(inicial)
+
+    def is_goal(self, state):
+        'Nuestra meta es que todos los jarros posean 1 litro de agua'
+        return all(x == 1 for x in state)
+
+    def capacidad(self, posicion_jarro, litros_que_tiene):
+        'Funcion auxiliar para calcular la capacidad restante de un jarro'
+        return posicion_jarro + 1 - litros_que_tiene
+
+    def actions(self, state):
+        '''
+        El enunciado dice que las operaciones son trasvasar de un jarro a otro,
+        con lo cual, nuestras acciones van a ser una tupla (jarro_origen, jarro_destino),
+        siendo jarro_origen y jarro_destino las posiciones de los jarros.
+
+        Una acción va a ser aplicable solo cuando jarro_origen tenga agua y
+        jarro_destino no esté lleno.
+        '''
+        acciones = []
+        for jarro_origen, litros_origen in enumerate(state):
+            for jarro_destino, litros_destino in enumerate(state):
+                if (litros_origen > 0 and self.capacidad(jarro_destino, litros_destino) > 0):
+                    acciones.append((jarro_origen, jarro_destino))
+        return acciones
+
+    def cost(self, state1, action, state2):
+        'El costo de la acción es la capacidad total del jarro origen'
+        return action[0] + 1
+
+    def result(self, state, action):
+        '''
+        Esta funcion le quita X litros a jarro origen y los pone en jarro_destino
+
+        X puede ser los litros del jarro origen o lo que falte para llenar el
+        jarro destino, lo que demande menos agua.
+        '''
+        jarro_origen, jarro_destino = action
+        litros_origen, litros_destino = state[jarro_origen], state[jarro_destino]
+
+        a_trasvasar = min(litros_origen,
+                          self.capacidad(jarro_destino, litros_destino))
+
+        s = list(state)
+        s[jarro_origen] -= a_trasvasar
+        s[jarro_destino] += a_trasvasar
+
+        return tuple(s)
+
+    def heuristic(self, state):
+        'Una posible heuristica es la cantidad de jarros que no tienen agua'
+        return len([x for x in state if x == 0])
+
+
+# Resolucion por A*
+result = astar(JarrosProblem(4), graph_search=True, viewer=WebViewer())
