@@ -2,57 +2,86 @@ from simpleai.search import (
     SearchProblem,
     astar,
 )
+Initial_state = (100, (0, 1), ((2, 0), (3, 1), (0, 2), (0, 3)), 0)  # Batería, robot, muestras restantes, cantidad de muestras recogidas
+Base = (0, 1)
+
 from simpleai.search.viewers import BaseViewer
 
-# Estado inicial y estado objetivo
-INITIAL = (0, 0, 0)
-GOAL = (5, 1, 8)
-
-class NaveAlienigena(SearchProblem):
+class RobotLunarBusqueda(SearchProblem):
     def actions(self, state):
-        # Definir las posibles acciones
-        return [
-            "rojo",
-            "verde",
-            "amarillo",
-            "celeste"
-        ]
+        bateria, posicion_robot, muestras, muestras_recogidas = state
+        fila_robot, columna_robot = posicion_robot
+        actions = []
+        movimientos = []
+        movimientos.append((fila_robot + 1, columna_robot))
+        movimientos.append((fila_robot - 1, columna_robot))
+        movimientos.append((fila_robot, columna_robot + 1))
+        movimientos.append((fila_robot, columna_robot - 1))
+        
+        for posible_movimiento in movimientos:
+            if 0 <= posible_movimiento[0] <= 3 and 0 <= posible_movimiento[1] <= 3 and bateria > 10:
+                actions.append(("moverse", posible_movimiento))
+                
+        if posicion_robot in muestras and bateria > 25:
+            actions.append(("muestrear", posicion_robot))
+            
+        if posicion_robot == Base:
+            if bateria > 5 and muestras_recogidas > 0:
+                actions.append(("dejar muestra", posicion_robot))
+            actions.append(("cargar", posicion_robot))
+            
+        return actions
 
     def result(self, state, action):
-        state = list(state)  # Convertir el estado a una lista para modificarlo
-        if action == "rojo":
-            state[0] += 3
-        elif action == "verde":
-            state[0] -= 2
-        elif action == "amarillo":
-            state[0], state[1] = state[1], state[0]
-        elif action == "celeste":
-            state[1], state[2] = state[2], state[1]
-        return tuple(state)  # Convertir el estado de nuevo a una tupla
+        accion, posicion = action
+        bateria, posicion_robot, muestras, muestras_recogidas = state
+        posicion_robot = list(posicion_robot)
+        muestras = list(muestras)
+        
+        if accion == "moverse":
+            posicion_robot = posicion
+            bateria -= 10
+        elif accion == "muestrear":
+            muestras_recogidas += 1
+            bateria -= 25
+            muestras.remove(posicion)
+        elif accion == "dejar muestra":
+            muestras_recogidas -= 1
+            bateria -= 5
+        elif accion == "cargar":
+            bateria = 100
+        
+        return bateria, tuple(posicion_robot), tuple(muestras), muestras_recogidas
 
     def cost(self, state, action, state2):
-        return 1  # Todas las acciones tienen el mismo costo
+        accion, _ = action
+        if accion == "moverse":
+            return 5
+        elif accion == "muestrear":
+            return 15
+        elif accion == "dejar muestra":
+            return 10
+        elif accion == "cargar":
+            return 30
+        return 0
 
     def is_goal(self, state):
-        return state == GOAL  # Verificar si el estado actual es el objetivo
+        _, _, muestras_restantes, muestras_recogidas = state
+        return len(muestras_restantes) == 0 and muestras_recogidas == 0
 
     def heuristic(self, state):
-        # Heurística que suma las diferencias absolutas entre el estado actual y el objetivo
-        return sum(abs(state[i] - GOAL[i]) for i in range(len(state)))
+        muestras_restantes = len(state[2])
+        return muestras_restantes * 15  # Asumimos que cada muestra toma 15 minutos
 
-# Crear una instancia del problema
-my_problem = NaveAlienigena(INITIAL)
+my_problem = RobotLunarBusqueda(Initial_state)
 v = BaseViewer()
-
-# Ejecutar la búsqueda A*
 result = astar(my_problem, viewer=v)
 
-# Mostrar los resultados
 if result is None:
     print("No solution")
 else:
     for action, state in result.path():
-        print("Action:", action)
-        print("State:", state)
+        print("A:", action)
+        print("S:")
+        print(*state, sep="\n")
     print("Final cost:", result.cost)
-
