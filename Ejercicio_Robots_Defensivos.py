@@ -29,7 +29,7 @@ class Robots_Defensivos(SearchProblem):
         posibilidades.append((2,robot2Fila, Robot2Columna+1))
         posibilidades.append((2,robot2Fila, Robot2Columna -1))
         for posible_casillero in posibilidades:
-            if posible_casillero[0] >= 0 and posible_casillero [0] <= 3 and posible_casillero[1] >= 0 and posible_casillero [0] <= 4: #Si esta dentro del rango y no hay un obstaculo es una opción
+            if posible_casillero[1] >= 0 and posible_casillero [1] <= 3 and posible_casillero[2] >= 0 and posible_casillero [2] <= 4: #Si esta dentro del rango y no hay un obstaculo es una opción
                 if (posible_casillero in Obstaculos) == False:
                     actions.append(posible_casillero)
         return actions
@@ -52,8 +52,8 @@ class Robots_Defensivos(SearchProblem):
             cuanto_falta = abs(robot[1] - objetivo[1])
         return cuanto_falta
 my_problem = Robots_Defensivos(Initial_state)
-#v = BaseViewer()
-v = WebViewer()
+v = BaseViewer()
+#v = WebViewer()
 result = astar(my_problem, 1000, viewer= v)
 if result is None:
     print("No solution")
